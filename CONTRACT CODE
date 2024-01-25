@@ -31,7 +31,8 @@ function document(data)
   body.replaceText('{{Position_Offered}}',rows[sheet.getLastRow()-1][5]);
   body.replaceText('{{Salary}}',rows[sheet.getLastRow()-1][6]);
   doc.saveAndClose();
-
+  const url=doc.getUrl();
+  sheet.getRange(sheet.getLastRow(),12).setValue(url);
   const pdf=doc.getAs('application/pdf');
   MailApp.sendEmail(rows[sheet.getLastRow()-1][8],'THANKYOU FOR APPLYING, HERE IS YOUR CONTRACT PDF','PRINT THIS FORM',{attachments:[pdf]});
 }
