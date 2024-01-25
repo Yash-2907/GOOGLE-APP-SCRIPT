@@ -1,0 +1,37 @@
+function userSubmit(e){
+  Logger.log(JSON.stringify(e));
+  addLog(e.namedValues);
+  document(e.namedValues);
+}
+
+function addLog(data)
+{
+  const ss=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('log');
+  ss.appendRow([data['Date'][0],data['Name'][0],data['Address'][0],data['Email address'][0],data['Salary'][0],data['Position_offered'][0],data['GMAIL_ACCOUNT_TO_RECEIVE_PDF'][0]]);
+}
+
+function document(data)
+{
+   const gd_template=DriveApp.getFileById('1BgCpTJw8iG2IkfRXRXVTJNq4kNUEDYLu3MIMm-Viqqg');
+   const destination=DriveApp.getFolderById('1kRRoAA6Qx660PJLeE9cK9PBK-pRlXxZ0');
+   const sheet=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Employee_Response');
+   const rows=sheet.getDataRange().getValues();
+   //Logger.log(rows[sheet.getLastRow()-1][8])
+
+
+  //create doc autofilled
+  const newFile=gd_template.makeCopy(('details %s',rows[sheet.getLastRow()-1][9]),destination);
+  const doc=DocumentApp.openById(newFile.getId());
+  const body=doc.getBody();
+  body.replaceText('{{Gender}}',rows[sheet.getLastRow()-1][1]);
+  body.replaceText('{{First_Name}}',rows[sheet.getLastRow()-1][9]);
+  body.replaceText('{{Address}}',rows[sheet.getLastRow()-1][2]);
+  body.replaceText('{{Phone_Number}}',rows[sheet.getLastRow()-1][3]);
+  body.replaceText('{{Date}}',rows[sheet.getLastRow()-1][4]);
+  body.replaceText('{{Position_Offered}}',rows[sheet.getLastRow()-1][5]);
+  body.replaceText('{{Salary}}',rows[sheet.getLastRow()-1][6]);
+  doc.saveAndClose();
+
+  const pdf=doc.getAs('application/pdf');
+  MailApp.sendEmail(rows[sheet.getLastRow()-1][8],'THANKYOU FOR APPLYING, HERE IS YOUR CONTRACT PDF','PRINT THIS FORM',{attachments:[pdf]});
+}
